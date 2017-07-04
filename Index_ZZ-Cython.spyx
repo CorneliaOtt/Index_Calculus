@@ -1,0 +1,37 @@
+from sage.arith.misc import *
+
+def relation_step(g, i, p, F):
+    temp = power_mod(g, i, p)
+    x = [ valuation(temp, pr) for pr in F ]
+    x.append(i)
+    a = [ pf[0] for pf in factor(temp) ]
+    b = all([ h in F for h in a ])
+    return x, a, b
+
+def power_step(g, p, q, F, w):
+    a = [ power_mod(g, comp, p) for comp in w ]
+    b = [ power_mod(g, comp + q, p) for comp in w ]
+    for k in range(len(F)):
+        if a[k] > b[k]:
+            w[k] = (w[k] + q) % (2*q)
+    return w
+
+def find_discrete_log(q, g, F, h, w):
+    p = 2*q + 1
+    i = 1
+    b = True
+    while b:
+        temp = (power_mod(g, i, p) * h) % p
+        x = [ valuation(temp, pr) for pr in F ]
+        x.append(i)
+        a = [ pf[0] for pf in factor(temp) ]
+        b = False
+        for j in a:
+            if j not in F:
+                b = True
+        i += 1
+        s = 0
+    for j in range(len(F)):
+        s += x[j]*w[j]
+    s = (s - x[len(F)]) % (p - 1)
+    return s
